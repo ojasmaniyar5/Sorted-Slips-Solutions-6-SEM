@@ -1,0 +1,10 @@
+<web-app>
+	<servlet>
+      <servlet-name>details</servlet-name>
+      <servlet-class>login</servlet-class>
+    </servlet>
+	<servlet-mapping>
+        <servlet-name>details</servlet-name>
+        <url-pattern>/april</url-pattern>
+    </servlet-mapping>
+</web-app>
