@@ -1,0 +1,151 @@
+MainActivity.java
+
+package com.example.slip6b;
+
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final String CHANNEL_ID = "NotificationExampleChannel";
+    private static final int NOTIFICATION_ID = 123;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Button buttonSendNotification = findViewById(R.id.button_send_notification);
+        buttonSendNotification.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendNotification("Hello! This is a notification message.");
+            }
+        });
+    }
+
+    private void sendNotification(String message) {
+        // Create an explicit intent for the second activity
+        Intent intent = new Intent(this, DisplayNotificationActivity.class);
+        intent.putExtra("notification_message", message);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Create a notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("Notification Example")
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        // Notification Manager
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Create notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Notification Example Channel";
+            String description = "Channel for Notification Example";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        // Show the notification
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+}
+
+------------------------------
+DisplayNotificationActivity.java
+
+package com.example.slip6b;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class DisplayNotificationActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_display_notification);
+
+        // Get the notification message from intent extras
+        Intent intent = getIntent();
+        String notificationMessage = intent.getStringExtra("notification_message");
+
+        // Display the notification message
+        TextView textViewNotificationMessage = findViewById(R.id.text_notification_message);
+        textViewNotificationMessage.setText(notificationMessage);
+    }
+}
+
+
+---------------------------------
+activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button_send_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Notification"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>
+
+------------------------------------
+activity_display_notification.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".DisplayNotificationActivity">
+
+    <TextView
+        android:id="@+id/text_notification_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notification Message"
+        android:textSize="20sp"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>
+
+--------------------------------------------
+Manifest
+
+<activity android:name=".DisplayNotificationActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
